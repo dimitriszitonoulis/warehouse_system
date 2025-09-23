@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Union
 from app.exceptions.exceptions import UnitNotFoundByIdError, UserNotFoundByCredentialsError, UserNotFoundByIdError
 from app.model.employee import Employee
 from app.model.supervisor import Supervisor
@@ -7,6 +7,7 @@ from app.model.unit import Unit
 from app.model.user import User
 from app.repositories.unit_repository import UnitRepository
 from app.repositories.user_repository import UserRepository
+from app.types import UserOrSubclass
 
 
 class UserService:
@@ -18,7 +19,7 @@ class UserService:
         self.unit_repository = unit_repository
 
 
-    def get_user_by_id(self, id: str) -> User:
+    def get_user_by_id(self, id: str) -> Union[Employee, Supervisor, Admin]:
         """
         Get a User instance from the DB by ID.
 
@@ -55,7 +56,7 @@ class UserService:
         return self._get_user_subclass(user)
 
 
-    def get_user(self, username: str, password: str, unit_id: Optional[str] = None) -> User:
+    def get_user(self, username: str, password: str, unit_id: Optional[str] = None) -> Union[Employee, Supervisor, Admin]:
         """
         Get a User instance from the DB by their credentials.
 
@@ -103,7 +104,7 @@ class UserService:
         return self.user_repository.change_password(id, password)
 
 
-    def _get_user_subclass(self, user: User) -> User:
+    def _get_user_subclass(self, user: User) -> Union[Employee, Supervisor, Admin]:
         """
         Convert base user to subclass based on role field.
 
