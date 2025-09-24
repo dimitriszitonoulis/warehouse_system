@@ -2,7 +2,6 @@ import os
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
 from app.blueprints.auth import create_auth_blueprint
-from app.blueprints.employee import create_employee_blueprint
 from app.blueprints.product import create_product_blueprint
 from app.blueprints.supervisor import create_supervisor_blueprint
 from app.blueprints.user import create_user_blueprint
@@ -69,7 +68,7 @@ def create_server():
 
     # Initialize services
     employee_service   = EmployeeService(usr_repo, emp_repo, unt_repo)
-    supervisor_service = SupervisorService(usr_repo, emp_repo, sup_repo, unt_repo)
+    # supervisor_service = SupervisorService(usr_repo, emp_repo, sup_repo, unt_repo)
     admin_service      = AdminService(adm_repo)
     user_service       = UserService(usr_repo, unt_repo)
     product_service    = ProductService(prd_repo, unt_repo)
@@ -85,8 +84,7 @@ def create_server():
 
     # Add blueprints for routes
     server.register_blueprint(create_auth_blueprint(user_service))
-    server.register_blueprint(create_user_blueprint(user_service))
     server.register_blueprint(create_product_blueprint(product_service))
-    server.register_blueprint(create_supervisor_blueprint(supervisor_service, employee_service, user_service))
+    server.register_blueprint(create_user_blueprint(user_service, employee_service))
 
     return server

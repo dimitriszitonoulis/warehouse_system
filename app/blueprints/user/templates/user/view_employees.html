@@ -27,7 +27,7 @@
           <td> {{ employee.unit_id }} </td>
           <td> {{ employee.unit_name }} </td>
           <td>
-            <form method="post" action="{{ url_for('supervisor.view_employees') }}">
+            <form method="post" action="{{ url_for('user.view_employees') }}">
               <input type="hidden" name="employee_id" value="{{ employee.id }}">
               <button type="submit">Delete</button>
             </form>

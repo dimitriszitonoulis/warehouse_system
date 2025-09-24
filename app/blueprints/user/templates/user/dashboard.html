@@ -35,12 +35,12 @@
     {% if role in ["supervisor", "admin"] %}
     <tr>
       <td>
-        <a href="{{ url_for('supervisor.create_employee') }}">Create employee account</a>
+        <a href="{{ url_for('user.create_employee') }}">Create employee account</a>
       </td>
     </tr>
     <tr>
       <td>
-        <a href="{{ url_for('supervisor.view_employees') }}">View employees</a>
+        <a href="{{ url_for('user.view_employees') }}">View employees</a>
       </td>
     </tr>
     {% endif %}
