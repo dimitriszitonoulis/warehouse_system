@@ -1,9 +1,14 @@
 from typing import Optional
+
 from pymongo.results import InsertOneResult
-from app.exceptions.exceptions import UnitNotFoundByIdError, UserNotFoundByCredentialsError, UserNotFoundByIdError
+
+from app.exceptions.exceptions import (
+    UnitNotFoundByIdError,
+    UserNotFoundByCredentialsError,
+    UserNotFoundByIdError,
+)
 from app.model.supervisor import Supervisor
 from app.model.unit import Unit
-from app.repositories import supervisor_repository
 from app.repositories.employee_repository import EmployeeRepository
 from app.repositories.supervisor_repository import SupervisorRepository
 from app.repositories.unit_repository import UnitRepository

@@ -1,11 +1,12 @@
-from cryptography.fernet import Fernet
-import hashlib
 import base64
+import hashlib
+
+from cryptography.fernet import Fernet
 
 
 def _get_key() -> bytes:
     key = b"My Secret Key!"  # Byte string
-    # Συνάρτηση κατακερματισμού Hash function 
+    # Συνάρτηση κατακερματισμού Hash function
     hlib = hashlib.md5()  # https://docs.python.org/3/library/hashlib.html
     hlib.update(key)
     # Κωδικοποίηση σε μορφή Base64 με ασφαλείς χαρακτήρες για χρήση σε url

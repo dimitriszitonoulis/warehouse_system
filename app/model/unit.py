@@ -1,5 +1,5 @@
-from typing import Optional
 import uuid
+from typing import Optional
 
 
 class Unit:
@@ -73,4 +73,4 @@ class Unit:
             data.get("volume")
         )
 
-        return unit 
+        return unit

@@ -1,8 +1,7 @@
 from typing import Optional
+
 from pymongo.database import Collection
-from app.model.employee import Employee
-from app.model.supervisor import Supervisor
-from app.model.admin import Admin
+
 from app.model.user import User
 
 

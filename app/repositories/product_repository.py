@@ -1,7 +1,9 @@
-from typing import List, Literal, Optional
+from typing import List, Optional
+
 from pymongo import ASCENDING, DESCENDING
 from pymongo.database import Collection
 from pymongo.results import InsertManyResult, InsertOneResult
+
 from app.model.product import Product
 
 

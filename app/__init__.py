@@ -1,9 +1,10 @@
 import os
+
 from pymongo import MongoClient
 from pymongo.errors import DuplicateKeyError
+
 from app.blueprints.auth import create_auth_blueprint
 from app.blueprints.product import create_product_blueprint
-from app.blueprints.supervisor import create_supervisor_blueprint
 from app.blueprints.user import create_user_blueprint
 from app.custom_flask import CustomFlask
 from app.repositories.admin_repository import AdminRepository

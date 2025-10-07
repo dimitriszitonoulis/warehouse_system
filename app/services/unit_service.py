@@ -1,5 +1,7 @@
-from typing import  Optional
+from typing import Optional
+
 from pymongo.results import InsertOneResult
+
 from app.exceptions.exceptions import UnitNotFoundByIdError
 from app.model.unit import Unit
 from app.repositories.unit_repository import UnitRepository

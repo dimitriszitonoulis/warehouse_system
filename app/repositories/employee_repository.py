@@ -1,8 +1,9 @@
 from typing import List, Optional
+
 from pymongo.database import Collection
 from pymongo.results import DeleteResult, InsertManyResult, InsertOneResult
-from app.model.employee import Employee
 
+from app.model.employee import Employee
 
 """
 Avoid Singleton pattern, use Dependency Injection

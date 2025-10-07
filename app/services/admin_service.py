@@ -1,5 +1,5 @@
-from pymongo.database import Collection
 from pymongo.results import InsertOneResult
+
 from app.model.admin import Admin
 from app.repositories.admin_repository import AdminRepository
 

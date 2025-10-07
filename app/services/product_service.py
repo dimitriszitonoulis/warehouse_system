@@ -1,10 +1,17 @@
-from typing import List, Literal, Optional
+from typing import List, Optional
+
 from pymongo.results import InsertManyResult, InsertOneResult
-from app.exceptions.exceptions import InsufficientProductQuantity, ProductDoesNotFitInUnit, ProductNotFoundByIdError, UnitNotFoundByIdError
+
+from app.exceptions.exceptions import (
+    InsufficientProductQuantity,
+    ProductDoesNotFitInUnit,
+    ProductNotFoundByIdError,
+    UnitNotFoundByIdError,
+)
 from app.model.product import Product
 from app.model.unit import Unit
-from app.repositories.unit_repository import UnitRepository
 from app.repositories.product_repository import ProductRepository
+from app.repositories.unit_repository import UnitRepository
 
 
 class ProductService:
@@ -46,7 +53,7 @@ class ProductService:
         else:
             if self.unit_repository.get_unit_by_id(unit_id) is None:
                 raise UnitNotFoundByIdError(unit_id)
-            product = self.product_repository.get_product_by_id(id, unit_id) 
+            product = self.product_repository.get_product_by_id(id, unit_id)
 
         if product is None:
             raise ProductNotFoundByIdError(id)
@@ -162,7 +169,7 @@ class ProductService:
                 }
             )
         except Exception as e:
-            raise ValueError(f"Invalid product format") from e
+            raise ValueError("Invalid product format") from e
 
         result = self.product_repository.insert_product(product)
 
@@ -233,7 +240,7 @@ class ProductService:
             try:
                 product = Product.from_dict(prod_dict_copy)
             except Exception as e:
-                raise ValueError(f"Invalid product format") from e
+                raise ValueError("Invalid product format") from e
             insert_list.append(product)
         # insert a product to each unit by inserting it multiple times
         # but with different unit_id each time
@@ -405,7 +412,7 @@ class ProductService:
             return  self.product_repository.search_products(None, None, name, id, min_quantity, max_quantity, unit_id)
 
         # No need to check order_type, ascending is default unless descending is specified
-        return self.product_repository.search_products(order_field, order_type, name, id, min_quantity, max_quantity, unit_id) 
+        return self.product_repository.search_products(order_field, order_type, name, id, min_quantity, max_quantity, unit_id)
 
 #####################################################################################################
 
@@ -455,7 +462,7 @@ class ProductService:
                 product_id, purchased_quantity, loss
             )
         except ValueError as e:
-            raise ValueError(f"Could not buy product") from e
+            raise ValueError("Could not buy product") from e
 
         return updated_product
 

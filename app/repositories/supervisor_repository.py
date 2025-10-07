@@ -1,6 +1,8 @@
 from typing import List, Optional
+
 from pymongo.database import Collection
 from pymongo.results import InsertManyResult, InsertOneResult
+
 from app.model.supervisor import Supervisor
 
 

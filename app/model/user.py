@@ -1,8 +1,10 @@
-from  __future__ import annotations # for pyright typechecking
-from typing import Any, Dict, List, Optional, Type
+from __future__ import annotations  # for pyright typechecking
+
 import uuid
+from typing import Any, Dict, List, Optional, Type
 
 from app.types import UserOrSubclass
+
 
 class User:
     id: str                  = ""

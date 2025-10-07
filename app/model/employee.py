@@ -1,5 +1,7 @@
-from  __future__ import annotations # for pyright typechecking
+from __future__ import annotations  # for pyright typechecking
+
 from typing import Optional
+
 from app.model.user import User
 
 

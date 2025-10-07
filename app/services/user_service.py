@@ -1,13 +1,17 @@
 from typing import Optional, Union
-from app.exceptions.exceptions import UnitNotFoundByIdError, UserNotFoundByCredentialsError, UserNotFoundByIdError
+
+from app.exceptions.exceptions import (
+    UnitNotFoundByIdError,
+    UserNotFoundByCredentialsError,
+    UserNotFoundByIdError,
+)
+from app.model.admin import Admin
 from app.model.employee import Employee
 from app.model.supervisor import Supervisor
-from app.model.admin import Admin
 from app.model.unit import Unit
 from app.model.user import User
 from app.repositories.unit_repository import UnitRepository
 from app.repositories.user_repository import UserRepository
-from app.types import UserOrSubclass
 
 
 class UserService:

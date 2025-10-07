@@ -1,8 +1,14 @@
 import re
 from typing import List, Optional, Tuple
-from flask import Blueprint, redirect, request, render_template, session, url_for
+
+from flask import Blueprint, redirect, render_template, request, session, url_for
+
 from app.blueprints.names import PRODUCT_BP
-from app.exceptions.exceptions import InsufficientProductQuantity, ProductNotFoundByIdError, UnitNotFoundByIdError
+from app.exceptions.exceptions import (
+    InsufficientProductQuantity,
+    ProductNotFoundByIdError,
+    UnitNotFoundByIdError,
+)
 from app.model.product import Product
 from app.repositories.product_repository import ProductRepository
 from app.services.product_service import ProductService
@@ -112,7 +118,7 @@ def create_product_blueprint(product_service: ProductService):
 
     @product_bp.route("/products", methods=["GET", "POST"])
     # need POST to build ulr, otherwise it would be /products?product_id=<value> when manual searching
-    @product_bp.route("/products/<product_id>", methods=["GET", "POST"]) 
+    @product_bp.route("/products/<product_id>", methods=["GET", "POST"])
     @login_required
     @required_role("employee")
     def view_product(product_id: Optional[str] = None):

@@ -1,6 +1,8 @@
 from typing import List, Optional, Union
-from flask import Blueprint, redirect, request, session, render_template, flash, url_for
+
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from pymongo.errors import DuplicateKeyError
+
 from app.blueprints.names import USER_BP
 from app.exceptions.exceptions import UnitNotFoundByIdError, UserNotFoundByIdError
 from app.model.admin import Admin

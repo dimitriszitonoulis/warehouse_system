@@ -1,8 +1,9 @@
 from typing import List
+
 from pymongo.database import Collection
 from pymongo.results import InsertManyResult, InsertOneResult
-from app.model.unit import Unit
 
+from app.model.unit import Unit
 
 """
 Avoid Singleton pattern, use Dependency Injection

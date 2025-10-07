@@ -1,9 +1,21 @@
-from flask import Blueprint, jsonify, url_for, request, session, redirect, render_template
-from app.exceptions.exceptions import UnitNotFoundByIdError, UserNotFoundByCredentialsError
+from flask import (
+    Blueprint,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
+
+from app.blueprints.names import ADMIN_BP, AUTH_BP, EMPLOYEE_BP, SUPERVISOR_BP, USER_BP
+from app.exceptions.exceptions import (
+    UnitNotFoundByIdError,
+    UserNotFoundByCredentialsError,
+)
 from app.model import employee
 from app.model.admin import Admin
 from app.model.supervisor import Supervisor
-from app.blueprints.names import ADMIN_BP, EMPLOYEE_BP, AUTH_BP, SUPERVISOR_BP, USER_BP
 from app.model.user import User
 from app.services.user_service import UserService
 
@@ -28,7 +40,8 @@ def create_auth_blueprint(user_service: UserService) -> Blueprint:
         # username = request.form["username"]
         # password = request.form["password"]
         # unit_id  = request.form["unit_id"]
-        username = "bw"
+        # username = "js" # employee
+        username = "bw" # supervisor
         password = "12"
         unit_id = "u1"
 

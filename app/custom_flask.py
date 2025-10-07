@@ -1,6 +1,6 @@
 from flask import Flask
-from pymongo.database import Database 
 from pymongo.collection import Collection
+from pymongo.database import Database
 
 
 class CustomFlask(Flask):

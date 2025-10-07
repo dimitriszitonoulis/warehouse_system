@@ -1,6 +1,12 @@
 from typing import List, Optional
+
 from pymongo.results import InsertOneResult
-from app.exceptions.exceptions import UnitNotFoundByIdError, UserNotFoundByCredentialsError, UserNotFoundByIdError
+
+from app.exceptions.exceptions import (
+    UnitNotFoundByIdError,
+    UserNotFoundByCredentialsError,
+    UserNotFoundByIdError,
+)
 from app.model.employee import Employee
 from app.model.unit import Unit
 from app.repositories.employee_repository import EmployeeRepository
