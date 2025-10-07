@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      table, th, td {
+        border: 2px solid;
+        border-collapse: collapse;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Profile</h1>
+    {% if name %} 
+    <span> Are you sure you want to delete the following user?</span>
+      <table>
+        <tr>
+          <th>Name</th>
+          <th>Surname</th>
+          <th>Username</th>
+          <th>Unit id</th>
+          <th>Unit name</th>
+        </tr>
+        <tr>
+          <td> {{ name }} </td>
+          <td> {{ surname }} </td>
+          <td> {{ username }} </td>
+          <td> {{ unit_id }} </td>
+          <td> {{ unit_name }} </td>
+          <td>
+            <form method="post" action="{{ url_for('user.delete_user', user_id=user_id) }}">
+              <input type="hidden" name="user_id" value="{{ user_id }}">
+                <!-- Must be sent back,
+                    if not after submitting this will point to delete employee
+                -->
+              <input type="hidden" name="prev_page" value="{{ prev_page }}">
+              <button type="submit">Yes</button>
+            </form>
+          </td>
+        </tr>
+      </table>
+    {% endif %}
+
+    {% if error %}
+    <p style="color: red;">{{ error }}</p>
+    {% endif %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flashes">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <a href=" {{ prev_page }} ">Go back</a>
+    <br>
+    <a href="{{ url_for('user.dashboard') }}">Return to dashboard </a>
+  </body>
+</html>

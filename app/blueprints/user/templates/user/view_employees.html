@@ -27,8 +27,15 @@
           <td> {{ employee.unit_id }} </td>
           <td> {{ employee.unit_name }} </td>
           <td>
-            <form method="post" action="{{ url_for('user.view_employees') }}">
-              <input type="hidden" name="employee_id" value="{{ employee.id }}">
+            <form method="get" action="{{ url_for('user.change_password', user_id=employee.id) }}">
+              <input type="hidden" name="user_id" value="{{ employee.id }}">
+              <input type="hidden" name="prev_page" value="{{ request.path }}">
+              <button type="submit">Change password</button>
+            </form>
+
+            <form method="get" action="{{ url_for('user.delete_user', user_id=employee.id) }}">
+              <input type="hidden" name="user_id" value="{{ employee.id }}">
+              <input type="hidden" name="prev_page" value="{{ request.path }}">
               <button type="submit">Delete</button>
             </form>
           </td>
@@ -36,10 +43,12 @@
         {% endfor %}
       </table>
 
-      <a href="{{ url_for('user.dashboard') }}">Return to dashboard </a>
 
     {% if error %}
     <p style="color: red;">{{ error }}</p>
     {% endif %}
+
+    <a href="{{ url_for('user.dashboard') }}">Return to dashboard </a>
+
   </body>
 </html>
