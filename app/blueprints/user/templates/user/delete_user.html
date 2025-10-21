@@ -10,7 +10,7 @@
   </head>
   <body>
     <h1>Profile</h1>
-    {% if name %} 
+    {% if user %} 
     <span> Are you sure you want to delete the following user?</span>
       <table>
         <tr>
@@ -21,17 +21,18 @@
           <th>Unit name</th>
         </tr>
         <tr>
-          <td> {{ name }} </td>
-          <td> {{ surname }} </td>
-          <td> {{ username }} </td>
-          <td> {{ unit_id }} </td>
-          <td> {{ unit_name }} </td>
+          <td> {{ user.name }} </td>
+          <td> {{ user.surname }} </td>
+          <td> {{ user.username }} </td>
+          <td> {{ user.unit_id }} </td>
+          <td> {{ user.unit_name }} </td>
           <td>
             <form method="post" action="{{ url_for('user.delete_user', user_id=user_id) }}">
               <input type="hidden" name="user_id" value="{{ user_id }}">
-                <!-- Must be sent back,
-                    if not after submitting this will point to delete employee
-                -->
+              {# 
+                Must be sent back
+                if not, after submitting this will point to delete employee
+              #}
               <input type="hidden" name="prev_page" value="{{ prev_page }}">
               <button type="submit">Yes</button>
             </form>

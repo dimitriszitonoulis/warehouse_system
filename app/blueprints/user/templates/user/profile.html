@@ -10,6 +10,7 @@
   </head>
   <body>
     <h1>Profile</h1>
+      {% if user %}
       <table>
         <tr>
           <th>Name</th>
@@ -19,13 +20,14 @@
           <th>Unit name</th>
         </tr>
         <tr>
-          <td> {{ name }} </td>
-          <td> {{ surname }} </td>
-          <td> {{ username }} </td>
-          <td> {{ unit_id }} </td>
-          <td> {{ unit_name }} </td>
+          <td> {{ user.name }} </td>
+          <td> {{ user.surname }} </td>
+          <td> {{ user.username }} </td>
+          <td> {{ user.unit_id }} </td>
+          <td> {{ user.unit_name }} </td>
         </tr>
       </table>
+      {% endif %}
 
       <a href="{{ url_for('user.dashboard') }}">Return to dashboard </a>
 

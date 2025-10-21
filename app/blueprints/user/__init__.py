@@ -1,13 +1,19 @@
-from typing import List, Optional, Union
+from typing import List, Optional
 
-from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from flask import (
+    Blueprint,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from pymongo.errors import DuplicateKeyError
 
 from app.blueprints.names import USER_BP
 from app.exceptions.exceptions import UnitNotFoundByIdError, UserNotFoundByIdError
-from app.model.admin import Admin
 from app.model.employee import Employee
-from app.model.supervisor import Supervisor
 from app.model.user import User
 from app.services.employee_service import EmployeeService
 from app.services.user_service import UserService
@@ -20,53 +26,61 @@ def create_user_blueprint(
     ):
     user_bp = Blueprint(USER_BP, __name__, template_folder="templates")
 
+    @user_bp.errorhandler(UserNotFoundByIdError)
+    def user_not_found_by_id_error(e):
+        return render_template(
+            "user/error.html",
+            error     = "Could not find user.",
+            prev_page = request.referrer,
+            endpoint  = request.endpoint,
+        )
 
-    def _try_get_user(user_id: str) -> Union[Employee, Supervisor, Admin, str]:
-        try:
-            # return emp_service.get_employee_by_id(employee_id)
-            return user_service.get_user_by_id(user_id)
-        except (UserNotFoundByIdError, UnitNotFoundByIdError):
-            return "Could not find user"
-        except ValueError:
-            return "The user's record in the database is missing required attributes."
-
-    def _try_insert_employee(
-        name: str,
-        surname: str,
-        username: str,
-        password: str,
-        unit_id: str
-    ) -> Optional[str]:
-        error: Optional[str] = None
-        try:
-            employee_service.insert_employee(name, surname, username, password, unit_id)
-        except UnitNotFoundByIdError:
-            error="Could not find your unit."
-        except DuplicateKeyError:
-            error="A user with the same username already exists in the unit."
-        except ValueError:
-            error="The user's record in the database is missing required attributes."
-        return error
+    @user_bp.errorhandler(UserNotFoundByIdError)
+    def user_not_found_by_credentials_error(e):
+        return render_template(
+            "user/error.html",
+            error     = "Could not find user.",
+            prev_page = request.referrer,
+            endpoint  = request.endpoint,
+        )
 
 
-    def _try_delete_employee(employee_id: str, unit_id: Optional[str]) -> Optional[str]:
-        error: Optional[str] = None
-        try:
-            employee_service.delete_employee_by_id(employee_id, unit_id)
-        except UnitNotFoundByIdError:
-            error="Could not find your unit."
-        except UserNotFoundByIdError:
-            error = "Could not find employee."
-        return error
+    @user_bp.errorhandler(UnitNotFoundByIdError)
+    def unit_not_found_by_id_error(e):
+        return render_template(
+            "user/error.html",
+            error     = "Could not find your unit.",
+            prev_page = request.referrer,
+            endpoint  = request.endpoint,
+        )
 
 
-    def _try_get_employees_in_unit(unit_id: str) -> Union[List[Employee],str]:
-        try:
-            return employee_service.get_employees_in_unit(unit_id)
-        except UnitNotFoundByIdError:
-            return "Could not find your unit."
-        except ValueError:
-            return "A user's record in the database is missing required attributes."
+    @user_bp.errorhandler(DuplicateKeyError)
+    def duplicate_key_error(e):
+        return render_template(
+            "user/error.html",
+            error     = "A user with the same username already exists in the unit.",
+            prev_page = request.referrer,
+            endpoint  = request.endpoint,
+        )
+
+
+    @user_bp.errorhandler(ValueError)
+    def value_error(e):
+        return render_template(
+            "user/error.html",
+            error     = "The user's record in the database is missing required attributes.",
+            prev_page = request.referrer,
+            endpoint  = request.endpoint,
+        )
+
+
+    @user_bp.route("/error", methods=["GET", "POST"])
+    def error():
+        error_page = "user/error.html"
+        error = request.args.get("error")
+        prev_page = request.args.get("prev_page")
+        return render_template(error_page, error=error, prev_page=prev_page)
 
 
     @user_bp.route("/", methods=["GET"])
@@ -77,28 +91,28 @@ def create_user_blueprint(
         )
 
 
-
     @user_bp.route("/profile", methods=["GET"])
     @login_required
     @required_role("employee")
     def show_profile():
+        # TODO change employee_id to user id
+
         show_profile_page = "user/profile.html"
         employee_id: str = session["user_id"]
         user: User
 
-        result = _try_get_user(employee_id)
+        # result = _try_get_user(employee_id)
+        #
+        # if isinstance(result, str):
+        #     return render_template(show_profile_page, error=result)
+        # result = user_service.get_user_by_id(employee_id)
+        #
+        # user = result
 
-        if isinstance(result, str):
-            return render_template(show_profile_page, error=result)
-
-        user = result
+        user = user_service.get_user_by_id(employee_id)
         return render_template(
             show_profile_page,
-            name      = user.name,
-            surname   = user.surname,
-            username  = user.username,
-            unit_id   = user.unit_id,
-            unit_name = user.unit_name
+            user = user
         )
 
 
@@ -133,12 +147,7 @@ def create_user_blueprint(
                 error="Previous password cannot be the same as new password.",
             )
 
-        result = _try_get_user(user_id)
-
-        if isinstance(result, str):
-            return render_template(change_password_page, user_id=user_id, error=result)
-
-        user = result
+        user = user_service.get_user_by_id(user_id)
 
         if user.password != password_old:
             return render_template(
@@ -186,16 +195,7 @@ def create_user_blueprint(
                 username=username,
             )
 
-        error = _try_insert_employee(name, surname, username, password, unit_id)
-
-        if error is not None:
-            return render_template(
-                create_employee_page,
-                error=error,
-                name=name,
-                surname=surname,
-                username=username,
-            )
+        employee_service.insert_employee(name, surname, username, password, unit_id)
 
         flash("Employee created successfully.", "success")
 
@@ -210,30 +210,16 @@ def create_user_blueprint(
         unit_id: Optional[str] = session.get("unit_id")
 
         if request.method != "POST":
-            result = _try_get_user(user_id)
-            if isinstance(result, str):
-                return render_template(delete_user_page, user_id=user_id, error=result)
-
-            user = result
+            user = user_service.get_user_by_id(user_id)
 
             return render_template(
                 delete_user_page,
                 user_id=user_id,
-                name=user.name,
-                surname=user.surname,
-                username=user.username,
-                unit_id=user.unit_id,
-                unit_name=user.unit_name,
-                prev_page=prev_page,
+                user = user,
+                prev_page = prev_page
             )
 
-        # this should only be done when Yes is pressed in delete_user form
-        error = _try_delete_employee(user_id, unit_id)
-
-        if error is not None:
-            return render_template(
-                delete_user_page, error=error, user_id=user_id, prev_page=prev_page
-            )
+        employee_service.delete_employee_by_id(user_id, unit_id)
 
         flash("User deleted successfully.")
         return render_template(delete_user_page, user_id=user_id, prev_page=prev_page)
@@ -254,12 +240,9 @@ def create_user_blueprint(
                     view_employees_page, error="Unit id has no value."
                 )
 
-            result = _try_get_employees_in_unit(unit_id)
+            employees =  employee_service.get_employees_in_unit(unit_id)
 
-            if isinstance(result, str):
-                return render_template(view_employees_page, error=result)
-
-            return render_template(view_employees_page, employees=result)
+            return render_template(view_employees_page, employees=employees)
 
         # maybe have user_id to reuse this page
         # if an admin wants to delete a supervisor
