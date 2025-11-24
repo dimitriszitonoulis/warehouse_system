@@ -1,5 +1,4 @@
-import re
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 from flask import Blueprint, redirect, render_template, request, session, url_for
 
@@ -10,7 +9,6 @@ from app.exceptions.exceptions import (
     UnitNotFoundByIdError,
 )
 from app.model.product import Product
-from app.repositories.product_repository import ProductRepository
 from app.services.product_service import ProductService
 from app.utils.auth_utils import is_admin_logged_in, login_required, required_role
 
@@ -19,51 +17,44 @@ def create_product_blueprint(product_service: ProductService):
     product_bp = Blueprint(PRODUCT_BP, __name__, template_folder="templates")
 
 
-    def _view_products() -> Tuple[Optional[List[Product]], Optional[str]]:
-        products: Optional[List[Product]]
-        error: Optional[str] = None
-        try:
-            if is_admin_logged_in():
-                products = product_service.get_products()
-            else:
-                products = product_service.get_products_from_unit(session["unit_id"])
-        except UnitNotFoundByIdError:
-            error = "Could not find your unit."
-        except ValueError:
-            error = "The product's record in the database is missing required attributes."
-
-        return products, error
+    @product_bp.errorhandler(UnitNotFoundByIdError)
+    def unit_not_found_by_id_error(e):
+        return render_template(
+            "product/error.html",
+            error     = "Could not find your unit.",
+            prev_page = request.referrer,
+            endpoint  = request.endpoint,
+        )
 
 
-    def _get_product_or_error(product_id: str, unit_id: Optional[str] = None) -> Tuple[Optional[Product], Optional[str]]:
-        product: Optional[Product] = None
-        error: Optional[str]       = None
-        try:
-            product = product_service.get_product_by_id(product_id, unit_id)
-        except ProductNotFoundByIdError:
-            error="Could not find product."
-        except ValueError:
-            error="The product's record in the database is missing required attributes."
-
-        return product, error
+    @product_bp.errorhandler(ProductNotFoundByIdError)
+    def product_not_found_by_id_error(e):
+        return render_template(
+            "product/error.html",
+            error     = "Could not find product.",
+            prev_page = request.referrer,
+            endpoint  = request.endpoint,
+        )
 
 
-    def _sell_product_or_error(product_id:str, quantity_to_sell: float) -> Tuple[Optional[Product], Optional[str]]:
-        product: Optional[Product] = None
-        error: Optional[str]       = None
-        try:
-            product = product_service.sell_product(product_id, int(quantity_to_sell))
-        except ProductNotFoundByIdError:
-            error="Could not find product."
-        except InsufficientProductQuantity:
-            error="There are not enough items of the product in stock."
-        except ValueError:
-            error=(
-                "The product's record in the database is missing required attributes"
-                "or the quantity to sell is not a number."
-            )
+    @product_bp.errorhandler(InsufficientProductQuantity)
+    def insufficient_product_quantity_error(e):
+        return render_template(
+            "product/error.html",
+            error     = "There are not enough items of the product in stock.",
+            prev_page = request.referrer,
+            endpoint  = request.endpoint,
+        )
 
-        return product, error
+
+    @product_bp.errorhandler(ValueError)
+    def value_error(e):
+        return render_template(
+            "product/error.html",
+            error = "Invalid value entered.",
+            prev_page = request.referrer,
+            endpoint  = request.endpoint,
+        )
 
 
     @product_bp.route("/search-products", methods=["GET", "POST"])
@@ -75,13 +66,15 @@ def create_product_blueprint(product_service: ProductService):
         start_index_int: Optional[int] = None
         end_index_int: Optional[int]   = None
         search_products_page: str      = "product/search_products.html"
+        unit_id: str                   = session["unit_id"]
 
         if request.method != "POST":
-            products_list, error = _view_products()
-            if error:
-                return render_template(search_products_page, error=error)
+            if is_admin_logged_in():
+                products = product_service.get_products()
+            else:
+                products = product_service.get_products_from_unit(unit_id)
 
-            return render_template(search_products_page, products=products_list)
+            return render_template(search_products_page, products=products)
 
         # if the field is falsy (here it can be empty string "") assign None
         # 0 can be falsy, but this is not a problem because if 0 is entered in form
@@ -92,7 +85,6 @@ def create_product_blueprint(product_service: ProductService):
         product_id: Optional[str]   = request.form.get("product_id") or None
         min_quantity: Optional[str] = request.form.get("start_index") or None
         max_quantity: Optional[str] = request.form.get("end_index") or None
-        unit_id: Optional[str]      = session.get("unit_id")
 
         # are both present?
         if min_quantity not in ("", None) and max_quantity not in ("", None):
@@ -101,13 +93,19 @@ def create_product_blueprint(product_service: ProductService):
                 end_index_int   = int(max_quantity)
             except ValueError:
                 error = "From and To fields must be numbers"
-                return render_template(search_products_page, error=error, products=products)
+                return render_template(
+                    search_products_page, error=error, products=products
+                )
 
-        try:
-            products = product_service.search_products(order_field, order_type, product_name, product_id, start_index_int, end_index_int, unit_id)
-        except ValueError:
-            error = "Invalid prices for range fields."
-            return render_template(search_products_page, error=error)
+        products = product_service.search_products(
+            order_field,
+            order_type,
+            product_name,
+            product_id,
+            start_index_int,
+            end_index_int,
+            unit_id,
+        )
 
         if not products:
             error = "No products found"
@@ -117,7 +115,8 @@ def create_product_blueprint(product_service: ProductService):
 
 
     @product_bp.route("/products", methods=["GET", "POST"])
-    # need POST to build ulr, otherwise it would be /products?product_id=<value> when manual searching
+    # need POST to build ulr,
+    # otherwise it would be /products?product_id=<value> when manual searching
     @product_bp.route("/products/<product_id>", methods=["GET", "POST"])
     @login_required
     @required_role("employee")
@@ -128,9 +127,7 @@ def create_product_blueprint(product_service: ProductService):
 
         # Case 1: Came here after viewing all products and choosing one
         if product_id:
-            product, error = _get_product_or_error(product_id, unit_id)
-            if error:
-                return render_template(view_product_page, error=error)
+            product = product_service.get_product_by_id(product_id, unit_id)
             return render_template(
                 view_product_page, product=product, product_id=product_id
             )
@@ -145,18 +142,19 @@ def create_product_blueprint(product_service: ProductService):
         if not product_id:
             return render_template(view_product_page)
 
-        # retrieve product_id and redirect to Case 1 (to build ulr like: products/<product_id>)
+        # retrieve product_id and redirect to Case 1
+        # (to build ulr like: products/<product_id>)
         return redirect(url_for("product.view_product", product_id=product_id))
 
 
     @product_bp.route("/products/sell", methods=["GET", "POST"])
-    # need POST to build ulr, otherwise it would be /products/sell?product_id=<value> when manual searching
+    # need POST to build ulr,
+    # otherwise it would be /products/sell?product_id=<value> when manual searching
     @product_bp.route("/products/<product_id>/sell", methods=["GET", "POST"])
     @login_required
     @required_role("employee")
     def sell_product(product_id: Optional[str] = None):
         products: List[Optional[Product]]        = []
-        error: Optional[str]                     = None
         product_to_sell: Optional[Product]       = None
         product_after_sell: Optional[Product]    = None
         unit_id: Optional[str]                   = session.get("unit_id")
@@ -166,14 +164,11 @@ def create_product_blueprint(product_service: ProductService):
             # Case 1: Came here from view_product:
             if product_id:
                 # get old product and show it.
-                product_to_sell, error = _get_product_or_error(product_id, unit_id)
-                if error:
-                    return render_template(
-                        sell_product_page, product_id=product_id, error=error
-                    )
+                product_to_sell = product_service.get_product_by_id(product_id, unit_id)
                 return render_template(
                     sell_product_page, product_id=product_id, products=[product_to_sell]
                 )
+
             return render_template(sell_product_page, product_id="")
 
         # Case 2: Came here after clicking sell product in dashboard:
@@ -185,11 +180,7 @@ def create_product_blueprint(product_service: ProductService):
             return render_template(sell_product_page)
 
         # retrieve product from db
-        product_to_sell, error = _get_product_or_error(product_id, unit_id)
-        if error:
-            return render_template(
-                sell_product_page, product_id=product_id, error=error
-            )
+        product_to_sell = product_service.get_product_by_id(product_id, unit_id)
         products.append(product_to_sell)
 
         # show product and its id
@@ -199,11 +190,9 @@ def create_product_blueprint(product_service: ProductService):
             )
 
         # sell product
-        product_after_sell, error = _sell_product_or_error(product_id, int(quantity_to_sell))
-        if error:
-            return render_template(
-                sell_product_page, product_id=product_id, products=products, error=error
-            )
+        product_after_sell = product_service.sell_product(
+            product_id, int(quantity_to_sell)
+        )
         products.append(product_after_sell)
 
         # show product before and after selling
