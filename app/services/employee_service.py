@@ -19,8 +19,12 @@ class EmployeeService():
     employee_repository: EmployeeRepository
     unit_repository: UnitRepository
 
-
-    def __init__(self, user_repository: UserRepository, employee_repository: EmployeeRepository, unit_repo: UnitRepository):
+    def __init__(
+        self,
+        user_repository: UserRepository,
+        employee_repository: EmployeeRepository,
+        unit_repo: UnitRepository,
+    ):
         self.user_repository     = user_repository
         self.employee_repository = employee_repository
         self.unit_repository     = unit_repo
@@ -51,8 +55,6 @@ class EmployeeService():
             DuplicateKeyError: If an employee with the same username
                 already exists in the unit (the pair username unit_id must be unique).
             UnitNotFoundByIdError: If no unit with the given `unit_id` exists.
-            ValueError: If the employee record is missing required attributes
-            (see EmployeeRepository.insert_employee()).
         """
 
         unit: Optional[Unit] = self.unit_repository.get_unit_by_id(unit_id)
@@ -70,7 +72,6 @@ class EmployeeService():
             unit_name = None
         )
         return self.employee_repository.insert_employee(employee)
-
 
     def get_employee_by_id(self, id: str) -> Employee:
         """
@@ -90,7 +91,8 @@ class EmployeeService():
 
         Raises:
             UserNotFoundByIdError: If the employee does not exist.
-            UnitNotFoundByIdError: If the unit does not exist for the employee's `unit_id`.
+            UnitNotFoundByIdError: If the unit does not exist
+            for the employee's `unit_id`.
             ValueError: If the employee record is missing required attributes
                 (see EmployeeRepository.get_employee_by_id()).
         """
@@ -115,7 +117,7 @@ class EmployeeService():
 
         return employee
 
-    """ TODO fix incorrect raise value error  in docstring, points to incorrect funtion"""
+
     def get_employee(self, username: str, password: str, unit_id: str) -> Employee:
         """
         Get an Employee instance from the DB by their credentials.
@@ -137,7 +139,7 @@ class EmployeeService():
             UserNotFoundByCredentialsError: If the employee does not exist.
             UnitNotFoundByIdError: If the unit does not exist.
             ValueError: If the employee record is missing required attributes
-                (see EmployeeRepository.get_employee_by_id()).
+                (see EmployeeRepository.get_employee()).
         """
         # retrieve Employee object
         # unit_name is not saved in DB, it is None
@@ -184,6 +186,7 @@ class EmployeeService():
 
         return employees
 
+
     def delete_employee_by_id(
         self, employee_id: str, unit_id: Optional[str] = None
     ) -> None:
@@ -199,7 +202,7 @@ class EmployeeService():
             DeleteResult: The result of the deletion.
 
         Raises:
-            UserNotFoundByCredentialsError: If the employee does not exist.
+            UserNotFoundByIdError: If the employee does not exist.
             UnitNotFoundByIdError: If the unit does not exist.
         """
 
