@@ -1,4 +1,7 @@
 __pycache__/
 
+# this is a volume created by the mongodb conmtainer
+data/
+
 .env
 TODO*
