@@ -48,6 +48,12 @@
     {% if role in ["admin"] %}
     {% endif %}
 
+      <tr>
+        <td>
+          <a href="{{ url_for('auth.logout') }}">Logout</a>
+        </td>
+      </tr>
+
     </table>
   </body>
 </html>
