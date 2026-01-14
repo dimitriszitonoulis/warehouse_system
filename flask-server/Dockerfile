@@ -1,4 +1,4 @@
-FROM python:3.14
+FROM python:3.12-slim
 
 # Set the working directory to /app
 WORKDIR /app
@@ -11,15 +11,11 @@ EXPOSE 5000
 
 # Update apt (while building the image, not when running the container)
 RUN apt-get update -y \
-&& apt-get upgrade -y \
 # Upgrade pip (while building the image, not when running the container)
 && pip install --no-cache-dir --upgrade pip \
 # Install the dependencies (while building the image, not when running the container)
-&& pip install --no-cache-dir -r requirements.txt 
+&& pip install --no-cache-dir -r requirements.txt \
+&& chmod +x start.sh
 
-
-# Run the exercise.py script when the container has launched
-#CMD ["python", "-u", "populatedb.py"]
-# CMD ["sh", "-c", "python populatedb.py && python server.py"]
-CMD ["python", "-u", "server.py"]
+CMD ["./start.sh"]
 
