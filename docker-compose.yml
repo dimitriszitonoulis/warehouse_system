@@ -1,0 +1,21 @@
+services:
+  mongodb:
+    image: mongo:8.0.5
+    container_name: mongodb
+    ports:
+      - 27017:${MONGO_PORT}
+    volumes:
+      - ./data:/data/db
+  flask-service:
+    build:
+      context: ./flask-server
+    image: test_img
+    container_name: test_container
+    depends_on:
+      - mongodb
+    ports:
+      - 5000:${SERVER_PORT}
+    environment:
+      - SERVER_HOST=${SERVER_HOST}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_DATABASE=${MONGO_DATABASE}
