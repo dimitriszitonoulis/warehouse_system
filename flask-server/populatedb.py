@@ -1,3 +1,5 @@
+import os
+
 from pymongo import MongoClient
 from pymongo.database import Collection
 
@@ -115,17 +117,18 @@ def add_products(prod_repo: ProductRepository):
 def main():
     # Connection for usage from the Lab
     # client = pymongo.MongoClient("83.212.238.166", 27017)
-    client                = MongoClient("localhost", 27017)
-    db                    = client["LogisticsDB"]
+    MONGO_DATABASE        = os.environ.get("MONGO_DATABASE", "LogisticsDB")
+    MONGO_HOST            = os.environ.get("MONGO_HOST", "localhost")
+    MONGO_PORT            = int(os.environ.get("MONGO_PORT", 27017))
+    client                = MongoClient(MONGO_HOST, MONGO_PORT)
+    db                    = client[MONGO_DATABASE]
     user_collection       = db["users"]
     unit_collection       = db["units"]
     product_collection    = db["products"]
 
-
     user_collection.drop()
     unit_collection.drop()
     product_collection.drop()
-
 
     # repositories
     emp_repo = EmployeeRepository(user_collection)
