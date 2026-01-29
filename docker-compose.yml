@@ -9,8 +9,8 @@ services:
   flask-service:
     build:
       context: ./flask-server
-    image: test_img
-    container_name: test_container
+    image: flask_server_image
+    container_name: flask_server
     depends_on:
       - mongodb
     ports:
